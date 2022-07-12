@@ -7,6 +7,7 @@
 #include <queue>
 #include <fstream>
 #include <cstdio>
+#include <bitset>
 
 
 
@@ -22,5 +23,5 @@ public:
     long GetSize();
 };
 
-void GenerateData();
+void GenerateData(int freq);
 void PrintData();

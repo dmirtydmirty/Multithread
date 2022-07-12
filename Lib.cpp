@@ -1,15 +1,12 @@
 #include "Lib.h"
-long freq = 50;
+//long freq = 50;
 
-std::ofstream fout;
+
 std::mutex mtx;
 std::condition_variable cond;
-unsigned counter=0;
-int writePosition=0;
-long writeIndex=0;
 std::queue<elementOfQueue> queueOfdData;
 
-unsigned* buffer = new unsigned[256*1024*1024/sizeof(unsigned)];
+
 
 elementOfQueue::elementOfQueue(unsigned * ptr, long s)
 {
@@ -19,9 +16,15 @@ elementOfQueue::elementOfQueue(unsigned * ptr, long s)
 unsigned * elementOfQueue::GetPosition(){return this->position;}
 long elementOfQueue::GetSize(){return this->size;}
 
-void GenerateData()
+void GenerateData(int freq)
 {
-    for (int j=0; j<32000 ; j++)
+    long mbCounter=0;
+    const long limit=1;
+    unsigned counter=0;
+    int writePosition=0;
+    long writeIndex=0;
+    unsigned* buffer = new unsigned[256*1024*1024/sizeof(unsigned)];
+    while (mbCounter<=limit)
     {
         std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         for(long i=0; i<1024*1024/sizeof(unsigned); i++)
@@ -29,7 +32,7 @@ void GenerateData()
             *(buffer+writeIndex)=counter++;
             writeIndex++;
         }
-        writeIndex=writeIndex % (256*1024*1024/sizeof(unsigned));
+
 
         elementOfQueue oneMb(buffer+writePosition*1024*1024/sizeof(unsigned), 1024*1024/sizeof(unsigned));
         std::unique_lock<std::mutex> lock(mtx);
@@ -41,17 +44,20 @@ void GenerateData()
         queueOfdData.push(oneMb);
         cond.notify_all();
         lock.unlock();
-        writePosition++;
-        writePosition = writePosition % (1024*1024/sizeof(unsigned)*256);
+        writePosition = ++writePosition % 256;
         std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-        std::this_thread::sleep_for(std::chrono::microseconds (100000/freq - duration));
+
+        std::this_thread::sleep_for(std::chrono::microseconds (1000000 /freq - duration));
+        mbCounter++;
     }
+    delete [] buffer;
 
 }
 
 void PrintData()
 {
+    std::ofstream fout;
     fout.open("Data.txt");
     fout.close();
 
@@ -64,13 +70,12 @@ void PrintData()
         });
 
 
-        fout.open("Data.txt", std::ios::binary | std::ios::app);
+        fout.open("Data.txt",  std::ios::app);
         if (fout.is_open())
         {
             for(long i=0; i<queueOfdData.front().GetSize(); i++)
-                fout<< std::bitset<32>(*(queueOfdData.front().GetPosition()+i));
+            fout.write((char*)(queueOfdData.front().GetPosition()+i), sizeof(unsigned));
             queueOfdData.pop();
-
             fout.close();
         }
         lock.unlock();

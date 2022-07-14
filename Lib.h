@@ -11,7 +11,9 @@
 
 
 
-
+const int bufferSizeMb =256;
+const long oneMbSize=1000*1000/sizeof(unsigned);
+const long limit=100;
 
 class elementOfQueue
 {
@@ -23,5 +25,5 @@ public:
     long GetSize();
 };
 
-void GenerateData(int freq);
+void GenerateData(int freq, unsigned* buffer);
 void PrintData();

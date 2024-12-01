@@ -92,6 +92,8 @@ jobs:
 
       - name: Upload Linux artifact to release
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./release-lin-${{ github.ref_name }}.tar.gz
@@ -100,6 +102,8 @@ jobs:
 
       - name: Upload Windows artifact to release
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./release-win-${{ github.ref_name }}.7z

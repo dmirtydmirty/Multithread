@@ -69,13 +69,13 @@ jobs:
       - name: Download Linux artifact
         uses: actions/download-artifact@v3
         with:
-          name: release-artifact-ubuntu-latest
+          name: release-artifact-lin
           path: ./
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v3
         with:
-          name: release-artifact-windows-latest
+          name: release-artifact-win
           path: ./
 
       - name: Create Release

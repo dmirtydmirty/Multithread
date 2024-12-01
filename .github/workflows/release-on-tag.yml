@@ -27,7 +27,7 @@ jobs:
           tar -czvf release-lin-${{ github.ref_name }}.tar.gz release
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: release-artifact-lin
           path: release-lin-${{ github.ref_name }}.tar.gz
@@ -55,7 +55,7 @@ jobs:
         7z a release-win-${{ github.ref_name }}.7z release
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-artifact-win
         path: release-win-${{ github.ref_name }}.7z

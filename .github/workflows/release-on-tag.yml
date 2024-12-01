@@ -24,7 +24,7 @@ jobs:
       run: |
           mkdir -p release
           cp build/multithread  release/
-          tar -czvf release-lin-${{ github.ref_name }}.tar.gz
+          tar -czvf release-lin-${{ github.ref_name }}.tar.gz release
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -38,12 +38,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Install CMake
-      uses: actions/setup-cmake@v2
-      with:
-          cmake-version: latest
-
 
     - name: Install 7-Zip
       uses: fcwu/setup-7zip@v1
@@ -58,7 +52,7 @@ jobs:
       run: |
         mkdir release
         copy build\Release\multithread.exe release\ 
-        7z a release-win-${{ github.ref_name }}.7z
+        7z a release-win-${{ github.ref_name }}.7z release
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3

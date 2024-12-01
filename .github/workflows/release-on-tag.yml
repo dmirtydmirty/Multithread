@@ -24,14 +24,13 @@ jobs:
       run: |
           mkdir -p release
           cp build/multithread  release/
-          archive_name="release-lin-${{ github.ref_name }}.tar.gz"
-          tar -czvf $archive_name release
+          tar -czvf release-lin-${{ github.ref_name }}.tar.gz
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-          name: release-artifact
-          path: ${{ archive_name }}
+          name: release-artifact-lin
+          path: release-lin-${{ github.ref_name }}.tar.gz
 
 
   build-windows:
@@ -59,14 +58,13 @@ jobs:
       run: |
         mkdir release
         copy build\Release\multithread.exe release\ 
-        archive_name="release-win-${{ github.ref_name }}.7z"
-        7z a $archive_name release
+        7z a release-win-${{ github.ref_name }}.7z
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: release-artifact
-        path: ${{ archive_name }}
+        name: release-artifact-win
+        path: release-win-${{ github.ref_name }}.7z
         
 
   publish-release:

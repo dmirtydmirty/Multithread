@@ -1,0 +1,114 @@
+name: Release on tag
+on:
+  create:
+    tags:
+      - v*
+env:
+  BUILD_TYPE: Release
+
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+  
+    steps:
+    - uses: actions/checkout@v3
+  
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+  
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Create release artifact
+      run: |
+          mkdir -p release
+          cp build/multithread  release/
+          archive_name="release-lin-${{ github.ref_name }}.tar.gz"
+          tar -czvf $archive_name release
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+          name: release-artifact
+          path: ${{ archive_name }}
+
+
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install CMake
+      uses: actions/setup-cmake@v2
+      with:
+          cmake-version: latest
+
+
+    - name: Install 7-Zip
+      uses: fcwu/setup-7zip@v1
+
+    - name: Configure CMake
+      run:  cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Visual Studio 17 2022" 
+
+    - name: Build
+      run:  cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Create release artifact
+      run: |
+        mkdir release
+        copy build\Release\multithread.exe release\ 
+        archive_name="release-win-${{ github.ref_name }}.7z"
+        7z a $archive_name release
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-artifact
+        path: ${{ archive_name }}
+        
+
+  publish-release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: release-artifact-ubuntu-latest
+          path: ./
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: release-artifact-windows-latest
+          path: ./
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          body: This is a release build.
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux artifact to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release-lin-${{ github.ref_name }}.tar.gz
+          asset_name: release-lin-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/x-gzip
+
+      - name: Upload Windows artifact to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release-win-${{ github.ref_name }}.7z
+          asset_name: release-win-${{ github.ref_name }}.7z
+          asset_content_type: application/x-7z-compressed

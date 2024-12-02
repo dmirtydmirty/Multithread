@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
   
     - name: Configure and  CMake
-      uses: docker/run-action@v2
+      uses: addnab/docker-run-action@v3
       with:
           image: docker://ghcr.io/dmirtydmirty/boost1-86-0:latest
           run: |

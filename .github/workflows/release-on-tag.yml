@@ -28,11 +28,11 @@ jobs:
     - name: Create release artifact
       run: |
           mkdir -p release
-          cp build/multithread  release/
+          cp ${{github.workspace}}/build/multithread  release/
           tar -czvf release-lin-${{ github.ref_name }}.tar.gz release
 
     - name: Browse_files
-      run: ls -a 
+      run: ls -a ${{github.workspace}}
      
     - name: Upload artifact
       uses: actions/upload-artifact@v4

@@ -10,21 +10,26 @@ env:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    container: ghcr.io/dmirtydmirty/boost1-86-0:latest 
   
     steps:
     - uses: actions/checkout@v3
   
-    - name: Configure and  CMake
-      uses: addnab/docker-run-action@v3
-      with:
-          image: docker://ghcr.io/dmirtydmirty/boost1-86-0:latest
-          run: |
-            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-            cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-            mkdir -p release
-            cp build/multithread  release/
-            tar -czvf release-lin-${{ github.ref_name }}.tar.gz release
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+  
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+    - name: Create release artifact
+      run: |
+          mkdir -p release
+          cp build/multithread  release/
+          tar -czvf release-lin-${{ github.ref_name }}.tar.gz release
+
+    - name: Browse_files
+      run: ls -a 
+     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
